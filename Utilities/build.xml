@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Utilities" default="archive">
+	<property name="classes" location="build/classes"/>
+	<property name="javadocs" location="build/javadocs"/>
+	
+	<target name="compile" description="Compiles the Java source code">
+		<mkdir dir="${classes}"/>
+		<javac srcdir="src" destdir="${classes}"/>
+	</target>
+	
+	<target name="archive" depends="compile" description="Creates the JAR file">
+		<jar destfile="build/Utilities.jar" basedir="${classes}"/>
+	</target>
+	
+	<target name="javadocs" description="Make javadocs">
+		<mkdir dir="${javadocs}"/>
+		<javadoc sourcepath="src" destdir="${javadocs}" packagenames="kgm.utility.*"/>
+		<zip basedir="${javadocs}" destfile="build/javadocs.zip"/>
+	</target>
+	
+	<target name="clean" description="Deletes all generated files">
+		<delete dir="build"/>
+	</target>
+</project>
