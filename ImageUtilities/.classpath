@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/ij143/plugins/jars/mpicbg.jar"/>
+	<classpathentry kind="lib" path="lib/ij143/plugins/mpicbg_.jar"/>
+	<classpathentry kind="lib" path="lib/ij143/ij.jar"/>
+	<classpathentry kind="lib" path="lib/ij143/plugins/TrakEM2_.jar"/>
+	<classpathentry kind="lib" path="lib/jama-1.0.2/Jama-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/javacv-20110219/javacpp.jar"/>
+	<classpathentry kind="lib" path="lib/javacv-20110219/javacv-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="lib/javacv-20110219/javacv.jar"/>
+	<classpathentry kind="lib" path="lib/jmf2.1.1e/jmf.jar"/>
+	<classpathentry kind="lib" path="lib/im2learn/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/im2learn/Im2Learn.jar"/>
+	<classpathentry kind="lib" path="lib/im2learn/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="lib/kgm/MatrixUtilities.jar"/>
+	<classpathentry kind="lib" path="lib/kgm/Utilities.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
