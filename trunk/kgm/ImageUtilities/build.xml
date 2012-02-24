@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ImageUtilities" default="archive">
+	<property name="classes" location="build/classes"/>
+	<property name="javadocs" location="build/javadocs"/>
+
+	<path id="classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="compile" description="Compiles the Java source code">
+		<mkdir dir="${classes}"/>
+		<javac srcdir="src" destdir="${classes}" classpathref="classpath"/>
+	</target>
+	
+	<target name="archive" depends="compile" description="Creates the JAR file">
+		<jar destfile="build/ImageUtilities.jar" basedir="${classes}"/>
+	</target>
+	
+	<target name="javadocs" description="Make javadocs">
+		<mkdir dir="${javadocs}"/>
+		<javadoc sourcepath="src" destdir="${javadocs}" packagenames="kgm.image.*" classpathref="classpath"/>
+		<zip basedir="${javadocs}" destfile="build/javadocs.zip"/>
+	</target>
+	
+	<target name="clean" description="Deletes all generated files">
+		<delete dir="build"/>
+	</target>
+</project>
