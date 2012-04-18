@@ -64,7 +64,7 @@ public class SelectRegions extends JFrame implements MouseListener, MouseMotionL
 		//Save selected regions
 		if(DIRTY){			
 		  try{
-		    BufferedWriter outs = new BufferedWriter(new FileWriter(output_path + Utility.getFilenameName(images.get(index)) + ".txt", true));
+		    BufferedWriter outs = new BufferedWriter(new FileWriter(output_path + Utility.getFilenameName(images.get(index)) + ".txt"));
 		    
 		    for(Iterator<Integer> itr = selected_regions.iterator(); itr.hasNext();){
 		    	outs.write(itr.next() + "\n");
