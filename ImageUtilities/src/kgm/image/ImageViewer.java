@@ -413,9 +413,9 @@ public class ImageViewer extends JFrame implements Runnable, MouseListener, Mous
     }
   	
     if(scroll_direction < 0){
-      index++;
-    }else{
       index--;
+    }else{
+      index++;
     }
     
     synchronized(data_lock){
