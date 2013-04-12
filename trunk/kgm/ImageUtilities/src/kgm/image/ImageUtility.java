@@ -3766,64 +3766,117 @@ public class ImageUtility
   
     return regions;
   }
-
-	/**
-   * Get the mean color of the given segments.
-   * @param Is the labeled segments within the color image
-   * @param Irgb the color image
-   * @return the mean color for each segment
-   */
-  public static Vector<Integer> getRegionColors(int[][] Is, int[][] Irgb)
-  {
-  	int h = Irgb.length;
-  	int w = Irgb[0].length;
-  	Vector<Integer> colors = new Vector<Integer>();
-    int[] sum_r;
-    int[] sum_g;
-    int[] sum_b;
-    int[] count;
-    int rgb, r, g, b;
   
-    //Find largest label
-    int maxi = 0;
+	/**
+   * Get the center positions of each label region in a segmented image.
+   * @param Is a labeled image
+   * @return the center of each region
+   */
+  public static Vector<Pixel> getRegionCentroids(int[][] Is)
+  {
+    Vector<Vector<Pixel>> regions = getRegions(Is);
+    Vector<Pixel> centers = new Vector<Pixel>();
+    int x, y, n;
     
+    for(int i=0; i<regions.size(); i++){
+    	x = 0;
+    	y = 0;
+    	n = regions.get(i).size();
+    	
+    	for(int j=0; j<n; j++){
+    		x += regions.get(i).get(j).x;
+    		y += regions.get(i).get(j).y;
+    	}
+    	
+    	centers.add(new Pixel(x/n, y/n));
+    }
+  
+    return centers;
+  }
+  
+	/**
+   * Get the pixels making up each label region's border in a segmented image.
+   * @param Is a labeled image
+   * @param SORT true if border points should be sorted according to angle off of region center
+   * @return the border points assigned to each label
+   */
+  public static Vector<Vector<Pixel>> getRegionBorders(int[][] Is, boolean SORT)
+  {
+  	int h = Is.length;
+  	int w = Is[0].length;
+    Vector<Vector<Pixel>> borders = new Vector<Vector<Pixel>>();
+    int n = 0;
+    
+    int minx, maxx, miny, maxy;
+    boolean BORDER;
+  
     for(int x=0; x<w; x++){
       for(int y=0; y<h; y++){
-        if(Is[y][x] > maxi) maxi = Is[y][x];
+        if(Is[y][x] > n) n = Is[y][x];
       }
     }
   
-    //Build colors from region means
-    sum_r = new int[maxi+1];
-    sum_g = new int[maxi+1];
-    sum_b = new int[maxi+1];
-    count = new int[maxi+1];
+    for(int i=0; i<=n; i++){
+    	borders.add(new Vector<Pixel>());
+    }
   
     for(int x=0; x<w; x++){
       for(int y=0; y<h; y++){
         if(Is[y][x] >= 0){
-  				rgb = Irgb[y][x];
-  				r = (rgb >> 16) & 0x000000ff;
-  				g = (rgb >> 8) & 0x000000ff;
-  				b = rgb & 0x000000ff;
-  
-          sum_r[Is[y][x]] += r;
-          sum_g[Is[y][x]] += g;
-          sum_b[Is[y][x]] += b;
-          count[Is[y][x]]++;
+          minx = x - 1;
+          maxx = x + 1;
+          miny = y - 1;
+          maxy = y + 1;
+
+          if(minx < 0) minx = 0;
+          if(maxx >= w) maxx = w-1;
+          if(miny < 0) miny = 0;
+          if(maxy >= h) maxy = h-1;
+
+          BORDER = false;
+          
+          for(int u=minx; u<=maxx; u++){
+            for(int v=miny; v<=maxy; v++){
+            	if(Is[v][u] != Is[y][x]){
+            		BORDER = true;
+            		break;
+            	}
+            }
+          }
+          
+          if(BORDER) borders.get(Is[y][x]).add(new Pixel(x,y));
         }
       }
     }
-  
-    for(int i=0; i<=maxi; i++){
-    	r = sum_r[i] / count[i];
-    	g = sum_g[i] / count[i];
-    	b = sum_b[i] / count[i];
-    	
-    	colors.add(r << 16 | g << 8 | b);
-    }
     
-    return colors;
+    //Sort borders
+    if(SORT){
+    	Vector<Pixel> centers = getRegionCentroids(Is);
+    	Vector<Pair<Double,Pixel>> point_angles = new Vector<Pair<Double,Pixel>>();
+    	int x, y;
+    	double theta;
+    	
+    	for(int i=0; i<borders.size(); i++){
+    		n = borders.get(i).size();
+    		point_angles.clear();
+    		
+    		for(int j=0; j<n; j++){
+    			x = borders.get(i).get(j).x = centers.get(i).x;
+    			y = borders.get(i).get(j).y = centers.get(i).y;
+    			theta = Math.atan(y/x);
+    			point_angles.add(new Pair<Double,Pixel>(theta,borders.get(i).get(j)));
+    		}
+    		
+    		Collections.sort(point_angles);
+    		borders.get(i).clear();
+    		
+    		for(int j=0; j<n; i++){
+    			borders.get(i).add(point_angles.get(j).second);
+    		}
+    	}
+    }
+  
+    return borders;
   }
 
 	/**
@@ -3994,6 +4047,65 @@ public class ImageUtility
     
     return borders;
   }
+
+	/**
+	 * Get the mean color of the given segments.
+	 * @param Is the labeled segments within the color image
+	 * @param Irgb the color image
+	 * @return the mean color for each segment
+	 */
+	public static Vector<Integer> getRegionColors(int[][] Is, int[][] Irgb)
+	{
+		int h = Irgb.length;
+		int w = Irgb[0].length;
+		Vector<Integer> colors = new Vector<Integer>();
+	  int[] sum_r;
+	  int[] sum_g;
+	  int[] sum_b;
+	  int[] count;
+	  int rgb, r, g, b;
+	
+	  //Find largest label
+	  int maxi = 0;
+	  
+	  for(int x=0; x<w; x++){
+	    for(int y=0; y<h; y++){
+	      if(Is[y][x] > maxi) maxi = Is[y][x];
+	    }
+	  }
+	
+	  //Build colors from region means
+	  sum_r = new int[maxi+1];
+	  sum_g = new int[maxi+1];
+	  sum_b = new int[maxi+1];
+	  count = new int[maxi+1];
+	
+	  for(int x=0; x<w; x++){
+	    for(int y=0; y<h; y++){
+	      if(Is[y][x] >= 0){
+					rgb = Irgb[y][x];
+					r = (rgb >> 16) & 0x000000ff;
+					g = (rgb >> 8) & 0x000000ff;
+					b = rgb & 0x000000ff;
+	
+	        sum_r[Is[y][x]] += r;
+	        sum_g[Is[y][x]] += g;
+	        sum_b[Is[y][x]] += b;
+	        count[Is[y][x]]++;
+	      }
+	    }
+	  }
+	
+	  for(int i=0; i<=maxi; i++){
+	  	r = sum_r[i] / count[i];
+	  	g = sum_g[i] / count[i];
+	  	b = sum_b[i] / count[i];
+	  	
+	  	colors.add(r << 16 | g << 8 | b);
+	  }
+	  
+	  return colors;
+	}
 
 	/**
 	 * Get a 2D matrix containing the white pixel locations within a black and white image.
@@ -4903,9 +5015,9 @@ public class ImageUtility
 	  	viewer.add(convolve(img_g, w, h, F), w, h, true);
   	}
   	
-  	if(false){			//Test Felzenswalb's super pixel method
+  	if(true){			//Test Felzenswalb's super pixel method
 	  	ImageViewer viewer = new ImageViewer();
-	  	int[][] Irgb = load("C:/Kenton/Data/Images/Temp/scar1.jpg");
+	  	int[][] Irgb = load("C:/Users/kmchenry/Files/Data/Images/scar1.jpg");
 	  	int h = Irgb.length;
 	  	int w = Irgb[0].length;
 	  	int[][] Is;
@@ -4913,6 +5025,16 @@ public class ImageUtility
 	  	viewer.add(Irgb, w, h, false);
 	  	Is = getSuperPixels(Irgb, 0.1, true);
 	  	viewer.add(n2argb(Is, Irgb), w, h, true);
+	  	
+	  	if(true){
+				try{
+					FileOutputStream fos = new FileOutputStream("tmp/scar1.ser");
+					ObjectOutputStream oos = new ObjectOutputStream(fos);
+					oos.writeObject(Is);
+					oos.close();
+					fos.close();
+				}catch(Exception e) {e.printStackTrace();}
+  		}
   	}
   	
   	if(false){				//Test Raskar's occluding contour method and Caselles' GAC's
@@ -4977,7 +5099,7 @@ public class ImageUtility
   		saveIcon("C:/Users/kmchenry/Files/Temp/icon.jpg", "C:/Users/kmchenry/Desktop/Notes.txt.lnk");
   	}
   	
-  	if(true){				//Test text rendering
+  	if(false){				//Test text rendering
   		ImageViewer.show(renderText("Hello", "Rage Italic", 1500, 150), "Debug");
   	}
   }
